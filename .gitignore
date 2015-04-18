@@ -1,0 +1,8 @@
+*.js
+*.js.deps
+*.js.deps.map
+*.js.map
+build.sh
+*.xcf
+packages/
+pubspec.lock
