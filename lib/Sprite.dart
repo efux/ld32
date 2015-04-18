@@ -25,6 +25,10 @@ class Sprite
 		_tileSize = tileSize;
 	}
 
+	int getTileSize() {
+		return _tileSize;
+	}
+
 	void step()
 	{
 		if(_run) {

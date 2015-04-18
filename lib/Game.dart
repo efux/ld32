@@ -13,6 +13,10 @@ part "Sprite.dart";
 part "Level.dart";
 part "Tile.dart";
 part "Player.dart";
+part "Bullet.dart";
+part "Vector.dart";
+part "Vector2f.dart";
+part "UI.dart";
 
 class Game {
 	static DrawingCanvas dc = new DrawingCanvas();
@@ -22,14 +26,15 @@ class Game {
 	double _start;
 	List<String> _imagesToLoad;
 	List<String> _soundsToLoad;
+	List<Bullet> _bullets = [];
 	Player player = new Player();
-	static AudioContext audioCtx = new AudioContext();
-	Level _level;
+	static AudioContext audioCtx = new AudioContext(); Level _level;
 
 	Game() {
 		_imagesToLoad = ["img/tileset.png",
 		"img/player.png",
-		"img/playerWalkRight.png"];
+		"img/playerWalkRight.png",
+		"img/water.png"];
 		_soundsToLoad = [];
 		load();
 		_level = new Level("level/test.map");	
@@ -61,7 +66,34 @@ class Game {
 
 	void start() {
 		_gameRunning = true;
+		Angle angle = new Angle();
+		angle.set(90.0);
+		math.Random rnd = new math.Random();
+		
+		for(int i=-100; i < 1000; i+=20) {
+			angle = new Angle();
+			angle.set(rnd.nextInt(360).toDouble());
+			_bullets.add(new Bullet(i,5, angle));
+		}
+		
+		angle.set(10.0);
+		_bullets.add(new Bullet(100,5, angle));
 		window.requestAnimationFrame(mainLoop);
+	}
+
+	void updateBullets(double delta) {
+		for(int b = 0; b < _bullets.length; b++) {
+			_bullets[b].update(delta);
+			if(_bullets[b].Y < 0 || _bullets[b].Y > GameParameters.screenHeight || _level.hasTileOnExactPosition(_bullets[b].X-Player.X, _bullets[b].Y) || player.isItGettingBlocked(_bullets[b].X-Player.X+(GameParameters.screenWidth/2).floor(), _bullets[b].Y)) {
+				_bullets.removeAt(b);
+			}
+		}
+	}
+
+	void drawBullets() {
+		for(Bullet b in _bullets) {
+			b.draw();
+		}
 	}
 
 	void mainLoop(double delta)
@@ -100,11 +132,14 @@ class Game {
 				}
 			}
 			player.update(delta);
+			updateBullets(delta);
 			if(delta-lastUpdated > 50) {
 				dc.clear();
 				lastUpdated = delta;
 				_level.draw();
 				player.draw();
+				drawBullets();
+				UI.draw();
 				dc.flip();
 
 
@@ -141,11 +176,17 @@ class Game {
 			case KeyCode.W:
 				player.jump();
 				break;
-			case KeyCode.S:
+			case KeyCode.ONE:
+				player.switchMode(0);
 				break;
-			case KeyCode.ENTER:
+			case KeyCode.TWO:
+				player.switchMode(1);
 				break;
-			case KeyCode.E:
+			case KeyCode.THREE:
+				player.switchMode(2);
+				break;
+			case KeyCode.FOUR:
+				player.switchMode(3);
 				break;
 			case KeyCode.ESC:
 				_gameRunning = false;

@@ -63,6 +63,16 @@ class Level
 		return false;
 	}
 
+	bool hasTileOnExactPosition(int x, int y) {
+		x = ((Player.X+x+GameParameters.screenWidth/2)/GameParameters.tileSize).floor();
+		y = (y/GameParameters.tileSize).floor();
+
+		if(_map[x][y].tileId != 0) {
+			return true;
+		}
+		return false;
+	}
+
 
 	void draw() {
 		int xstart = ((Player.X - (GameParameters.screenWidth/GameParameters.tileSize)/2) / GameParameters.tileSize ).floor();

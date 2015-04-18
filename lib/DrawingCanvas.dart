@@ -48,6 +48,7 @@ class DrawingCanvas
 
 	void clear()
 	{
+		_ctx.fillStyle = "#99CCFF";
 		_ctx.fillRect(0,0, canvas.width, canvas.height);
 	}
 }
