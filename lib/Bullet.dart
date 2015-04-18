@@ -7,7 +7,7 @@ class Bullet {
 	double lastUpdated;
 	int speed = 4;
 	Vector _movement;
-	static Sprite bullet = new Sprite(ResManager.get("img/bullet.png"));
+	Sprite bullet = new Sprite(ResManager.get("img/bullet.png"));
 
 	Bullet(int X, int Y, Angle angle) {
 		bullet.setTileSize(5);
@@ -16,7 +16,11 @@ class Bullet {
 		this.angle = angle;
 		_movement = new Vector(speed, 0);
 		_movement.rotate(angle);
-		
+	}
+
+	void setRock() {
+		bullet = new Sprite(ResManager.get("img/rock.png"));
+		bullet.setTileSize(64);
 	}
 
 	void update(double delta) {
@@ -33,7 +37,5 @@ class Bullet {
 	void draw() {
 		int dx = X-Player.X+(GameParameters.screenWidth/2).floor();
 		bullet.draw(Game.dc, dx, Y, angle);
-		print(dx.toString());
-
 	}
 }

@@ -20,6 +20,12 @@ class Player {
 	bool fire = false;
 	bool earth = false;
 	bool wind = false;
+	List<Bullet> _rocks = [];
+
+	int waterManaUsage = 8;
+	int earthManaUsage = 100;
+	int earthDamage = 10;
+
 	Sprite waterSprite = new Sprite(ResManager.get("img/water.png"));
 
 	Player() {
@@ -92,6 +98,7 @@ class Player {
 		if(lastUpdated == null) {
 			lastUpdated = delta;
 		}
+		updateRocks(delta);
 		if(delta - lastUpdated > 20) {
 			if(walking) {
 				if(walkingLeft) {
@@ -106,17 +113,63 @@ class Player {
 			if(water) {
 				useWater();
 			}
+			if(earth) {
+				useEarth();
+			}
 			chargeMana();
 		} 
 	}
 
 	void useWater() {
-		int waterManaUsage = 8;
+		waterManaUsage = 8;
 		if(mana > waterManaUsage) {
 			decrementMana(waterManaUsage);
 		} else {
 			switchMode(0);
 		}	
+	}
+
+	void useEarth() {
+		earthManaUsage = 100;
+		if(mana > earthManaUsage) {
+			decrementMana(earthManaUsage);
+			launchRocks();
+		} else {
+			switchMode(0);
+		}
+	}
+
+	void launchRocks() {
+		if(_rocks.length<5) {
+			for(int i = 0; i < GameParameters.screenWidth; i += 64) {
+				Angle angle = new Angle();
+				math.Random r = new math.Random();
+				angle.set(r.nextInt(180).toDouble());
+				Bullet b = new Bullet(i + Player.X-(GameParameters.screenWidth/2).floor(), -64, angle);
+				b.setRock();
+				_rocks.add(b);
+			}
+		}
+	}
+
+	void drawRocks() {
+		if(_rocks.length!=0) {
+			for(Bullet b in _rocks) {
+				b.draw();
+			}
+		}
+	}
+
+	void updateRocks(double delta) {
+		delta = delta+5.0;
+		if(_rocks.length!=0) {
+			for(int i = 0; i < _rocks.length; i++) {
+				_rocks[i].update(delta);
+				if(_rocks[i].Y > GameParameters.screenHeight) {
+					_rocks.removeAt(i);
+				} 
+			}
+		}
 	}
 
 	void decrementMana(int m) {
@@ -141,6 +194,7 @@ class Player {
 			waterAngle.set(waterAngle.getAngle()+1);
 			waterSprite.step();
 		}
+		drawRocks();
 	}
 
 	bool isItGettingBlocked(int x, int y) {
@@ -151,6 +205,15 @@ class Player {
 			}
 		}
 		return false;
+	}
+
+	int isGettingHurtBy(int x, int y) {
+		int hsx = (GameParameters.screenWidth/2).floor();
+		if(x > Player.X-hsx && x < Player.X+hsx) {
+			if(earth) {
+				return earthDamage;
+			}
+		}
 	}
 
 }

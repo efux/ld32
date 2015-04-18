@@ -26,12 +26,10 @@ class Level
 						row.add(new Tile(int.parse(content)));
 					}
 				}
-				print(row.length.toString());
 				_map.add(row);
 
 			}
 		}
-		print(_map.length.toString());
 
 		// transpond matrix
 		List<List<Tile>> transponded = [];
@@ -85,7 +83,6 @@ class Level
 		if(xend >= _map.length) {
 			xend = _map.length-1;
 		}
-		print(xend.toString());
 
 		for(int x = xstart; x <= xend; x++) {
 			List<Tile> tiles = _map[x];

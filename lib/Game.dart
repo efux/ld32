@@ -34,7 +34,8 @@ class Game {
 		_imagesToLoad = ["img/tileset.png",
 		"img/player.png",
 		"img/playerWalkRight.png",
-		"img/water.png"];
+		"img/water.png",
+		"img/rock.png"];
 		_soundsToLoad = [];
 		load();
 		_level = new Level("level/test.map");	
