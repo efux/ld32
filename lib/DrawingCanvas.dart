@@ -49,7 +49,6 @@ class DrawingCanvas
 
 	void clear()
 	{
-		_ctx.fillStyle = "#99CCFF";
-		_ctx.fillRect(0,0, canvas.width, canvas.height);
+		draw(ResManager.get("img/clouds.png"), 0-(Player.X/10).floor(),0);
 	}
 }

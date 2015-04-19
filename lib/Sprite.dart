@@ -21,6 +21,10 @@ class Sprite
 		c.drawScaled(canvas, x, y, canvas.width + _zoom, canvas.height + _zoom, angle);
 	}
 
+	void setFrame(int frame) {
+		_frame = frame;
+	}
+
 	void setYSize(int ys) {
 		_ySize = ys;
 	}
