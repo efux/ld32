@@ -4,6 +4,7 @@ class Sprite
 {
 	ImageElement _baseImg;
 	int _tileSize = 32;
+	int _ySize = 32;
 	int _frame = 0;
 	int _zoom = 0;
 	bool _run = true;
@@ -15,14 +16,19 @@ class Sprite
 
 	void draw(DrawingCanvas c, x, y, angle)
 	{
-		CanvasElement canvas = new CanvasElement(width: _tileSize, height: _tileSize);
+		CanvasElement canvas = new CanvasElement(width: _tileSize, height: _ySize);
 		canvas.context2D.drawImage(_baseImg, 0 - (_tileSize*_frame), 0);
 		c.drawScaled(canvas, x, y, canvas.width + _zoom, canvas.height + _zoom, angle);
+	}
+
+	void setYSize(int ys) {
+		_ySize = ys;
 	}
 
 	void setTileSize(int tileSize)
 	{
 		_tileSize = tileSize;
+		_ySize = tileSize;
 	}
 
 	int getTileSize() {

@@ -13,7 +13,19 @@ class Vector {
 
 	double dotProduct(Vector other)
 	{
-		return x * vector.x + y * vector.y;
+		return (x * other.x + y * other.y).toDouble();
+	}
+
+	double length() {
+		return math.sqrt(x*x + y*y);
+	}
+
+	double getAngle(Vector other) {
+		double div = length() * other.length();
+		if(div==0.0) {
+			div = 1.0;
+		}
+		return math.acos(dotProduct(other) / div);
 	}
 
 	void rotate(Angle angle)
@@ -22,5 +34,10 @@ class Vector {
 		double new_y = x * math.sin(angle.getRadian()) + y * math.cos(angle.getRadian());
 		x = new_x.round();
 		y = new_y.round();
+	}
+
+	String toString()
+	{
+		return "X: " + x.toString() + " Y: " + y.toString();
 	}
 }

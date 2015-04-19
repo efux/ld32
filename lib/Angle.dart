@@ -14,6 +14,10 @@ class Angle
 		return (_angle * math.PI) / 180.0;
 	}
 
+	void setRadian(double angle) {
+		_angle = (angle * 180.0) / math.PI;
+	}
+
 	double getAngle()
 	{
 		return _angle;

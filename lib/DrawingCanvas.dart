@@ -28,6 +28,7 @@ class DrawingCanvas
 	void drawTile(ImageElement img, int x, int y, int tilePos) {
 		tilePos--;
 		if(tilePos >= 0) {
+			tileCanvas.width = tileCanvas.width;
 			int ytile = (tilePos / (img.width/GameParameters.tileSize)).floor();
 			int xtile = tilePos % (img.width/GameParameters.tileSize).floor();
 			tileCanvas.context2D.drawImage(img, 0 - (GameParameters.tileSize*xtile), 0 - (GameParameters.tileSize*ytile));

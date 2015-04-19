@@ -8,29 +8,40 @@ class Player {
 	bool walking = false;
 	bool falling = false;
 	double fallingSpeed = 0.0;
-	static int mana = 100;
+	static int mana = 900;
 	static int maxMana = 1000;
 	bool jumping = false;
 	static int stepWidth = 5;
 	Angle waterAngle = new Angle();
-	Sprite playerWalkingRight = new Sprite(ResManager.get("img/player.png"));
+	Sprite playerWalkingRight = new Sprite(ResManager.get("img/playerWalkRight.png"));
+	Sprite playerWalkingLeft = new Sprite(ResManager.get("img/playerWalkLeft.png"));
+	Sprite summonSprite = new Sprite(ResManager.get("img/action.png"));
+	Sprite player = new Sprite(ResManager.get("img/player.png"));
 	static bool walkingLeft = false;
 	double lastUpdated;
-	bool water = true;
-	bool fire = false;
+	bool water = false;
+	bool fire = true;
 	bool earth = false;
 	bool wind = false;
+	bool activated = false;
+	bool lookingRight = true;
+	int oldMode = 0;
 	List<Bullet> _rocks = [];
 
 	int waterManaUsage = 8;
 	int earthManaUsage = 100;
 	int earthDamage = 10;
+	int fireManaUsage = 2;
+	int fireDamage = 3;
+	int windManaUsage = 20;
 
 	Sprite waterSprite = new Sprite(ResManager.get("img/water.png"));
+	Sprite fireSprite = new Sprite(ResManager.get("img/fire.png"));
 
 	Player() {
 		playerHeight = ResManager.get("img/playerWalkRight.png").height;
 		waterSprite.setTileSize(128);
+		fireSprite.setTileSize(64);
 	}
 
 	void walkRight() {
@@ -48,6 +59,9 @@ class Player {
 		   1 = Water
 		   2 = Wind
 		   3 = Earth */
+		if(oldMode==mode) {
+			mode = 0;
+		}
 		water = false;
 		fire = false;
 		wind = false;
@@ -90,7 +104,7 @@ class Player {
 		if(falling==false) {
 			jumping = true;
 			falling = true;
-			fallingSpeed = -10.0;
+			fallingSpeed = -8.0;
 		}
 	}
 
@@ -110,18 +124,28 @@ class Player {
 			if(falling) {
 				Y += fallingSpeed;
 			}
-			if(water) {
-				useWater();
-			}
-			if(earth) {
-				useEarth();
+			if(activated) {
+				if(water) {
+					useWater();
+				}
+				if(earth) {
+					useEarth();
+				}
+				if(fire) {
+					useFire();
+				} 
 			}
 			chargeMana();
 		} 
 	}
+	
+	void useFire() {
+		if(mana > fireManaUsage) {
+			decrementMana(fireManaUsage);
+		} 
+	}
 
 	void useWater() {
-		waterManaUsage = 8;
 		if(mana > waterManaUsage) {
 			decrementMana(waterManaUsage);
 		} else {
@@ -130,7 +154,6 @@ class Player {
 	}
 
 	void useEarth() {
-		earthManaUsage = 100;
 		if(mana > earthManaUsage) {
 			decrementMana(earthManaUsage);
 			launchRocks();
@@ -187,18 +210,48 @@ class Player {
 	}
 
 	void draw() {
-		playerWalkingRight.draw(Game.dc, GameParameters.screenWidth/2, Y, new Angle());
-		playerWalkingRight.step();
-		if(water) {
-			waterSprite.draw(Game.dc, GameParameters.screenWidth/2+playerWalkingRight.getTileSize()/2-waterSprite.getTileSize()/2, Y+playerWalkingRight.getTileSize()/2-waterSprite.getTileSize()/2,waterAngle);
-			waterAngle.set(waterAngle.getAngle()+1);
-			waterSprite.step();
+		if(walking) {
+			if(walkingLeft) {
+				playerWalkingLeft.draw(Game.dc, GameParameters.screenWidth/2, Y, new Angle());
+				playerWalkingLeft.step();
+			} else {
+				playerWalkingRight.draw(Game.dc, GameParameters.screenWidth/2, Y, new Angle());
+				playerWalkingRight.step();
+			}
+		} else {
+			if(activated) {
+				if(water || earth) {
+					summonSprite.draw(Game.dc, GameParameters.screenWidth/2, Y, new Angle());
+					summonSprite.step();
+				}	
+			} else {
+				player.draw(Game.dc, GameParameters.screenWidth/2, Y, new Angle());
+				player.step();
+			}
+		}
+		if(activated) {
+			if(water) {
+				waterSprite.draw(Game.dc, GameParameters.screenWidth/2+playerWalkingRight.getTileSize()/2-waterSprite.getTileSize()/2, Y+playerWalkingRight.getTileSize()/2-waterSprite.getTileSize()/2,waterAngle);
+				waterAngle.set(waterAngle.getAngle()+1);
+				waterSprite.step();
+			} 
+			if(fire) {
+				Angle angle = new Angle();
+				int dx = (GameParameters.screenWidth/2 + playerWalkingRight.getTileSize()/2).floor();
+				int dy = Y - 20;
+				if(lookingRight == false) { 
+					angle.set(180.0); 
+					dx = (GameParameters.screenWidth/2 - playerWalkingRight.getTileSize()/2 - fireSprite.getTileSize()).floor();
+				}
+				fireSprite.draw(Game.dc, dx, dy, angle);
+				fireSprite.step();
+			}
 		}
 		drawRocks();
 	}
 
 	bool isItGettingBlocked(int x, int y) {
-		if(water) {
+		if(water && activated) {
 			if(x-10 > GameParameters.screenWidth/2+playerWalkingRight.getTileSize()/2-waterSprite.getTileSize()/2 && x+10 < GameParameters.screenWidth/2+playerWalkingRight.getTileSize()/2+waterSprite.getTileSize()/2) {
 				if(y-10 > Y+playerWalkingRight.getTileSize()/2-waterSprite.getTileSize()/2 && y+10 < Y+playerWalkingRight.getTileSize()/2+waterSprite.getTileSize()/2)
 					return true;
@@ -209,9 +262,30 @@ class Player {
 
 	int isGettingHurtBy(int x, int y) {
 		int hsx = (GameParameters.screenWidth/2).floor();
-		if(x > Player.X-hsx && x < Player.X+hsx) {
+		if(activated) {
 			if(earth) {
-				return earthDamage;
+				if(x > Player.X-hsx && x < Player.X+hsx) {
+					return earthDamage;
+				}
+			}
+			if(fire) {
+				int hpx = (playerWalkingRight.getTileSize/2).floor();
+				if(lookingRight) {
+					if(x > hsx && x < hsx+fireSprite.getTileSize()+hpx+16) {
+						if(y > Y && y < Y+80) {
+							return fireDamage;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	void activate(bool a) {
+		if(!falling) {
+			activated = a;
+			if(activated) {
+				walking = false;
 			}
 		}
 	}
